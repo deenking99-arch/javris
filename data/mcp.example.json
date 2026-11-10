@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "dateisystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "C:/Users/DEINNAME/Documents"]
+    },
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": { "Authorization": "Bearer ${ENV:GITHUB_TOKEN}" }
+    }
+  }
+}

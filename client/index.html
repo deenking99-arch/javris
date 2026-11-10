@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#02060d" />
+    <title>J.A.R.V.I.S.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <canvas id="reactor" aria-hidden="true"></canvas>
+    <div class="backdrop" aria-hidden="true"></div>
+
+    <!-- Boot / Aktivierung (Browser erlauben Audio & Mikrofon erst nach einer Interaktion) -->
+    <div id="boot" class="boot">
+      <div class="boot-inner">
+        <div class="boot-mark">J.A.R.V.I.S.</div>
+        <div class="boot-sub">Just A Rather Very Intelligent System · v2.0</div>
+        <div id="boot-log" class="boot-log mono"></div>
+        <button id="boot-btn" class="hud-btn primary" type="button">System aktivieren</button>
+        <div class="boot-hint">Aktiviert Sprachausgabe und Mikrofon. Audio wird lokal verarbeitet, bis das Wake-Word „Jarvis“ erkannt wird.</div>
+      </div>
+    </div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">J.A.R.V.I.S.</span>
+        <span class="brand-sub mono" id="model-label">—</span>
+      </div>
+      <div class="state-readout" id="state-readout">
+        <span class="state-label" id="state-label">OFFLINE</span>
+        <span class="state-detail mono" id="state-detail"></span>
+      </div>
+      <div class="top-right">
+        <button class="mic-indicator" id="mic-indicator" type="button" title="Mikrofon an/aus">
+          <span class="mic-dot"></span><span class="mic-text mono" id="mic-text">MIC AUS</span>
+        </button>
+        <div class="clock">
+          <div class="clock-time" id="clock-time">--:--</div>
+          <div class="clock-date mono" id="clock-date"></div>
+        </div>
+        <button class="icon-btn" id="settings-btn" type="button" title="Einstellungen" aria-label="Einstellungen">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm8.6 4.6-1.9-.4a7 7 0 0 1-.6 1.5l1.1 1.6-1.6 1.6-1.6-1.1a7 7 0 0 1-1.5.6l-.4 1.9h-2.2l-.4-1.9a7 7 0 0 1-1.5-.6l-1.6 1.1-1.6-1.6 1.1-1.6a7 7 0 0 1-.6-1.5l-1.9-.4v-2.2l1.9-.4a7 7 0 0 1 .6-1.5L4.9 6.5l1.6-1.6 1.6 1.1a7 7 0 0 1 1.5-.6l.4-1.9h2.2l.4 1.9a7 7 0 0 1 1.5.6l1.6-1.1 1.6 1.6-1.1 1.6a7 7 0 0 1 .6 1.5l1.9.4Z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="hud">
+      <section class="col col-left">
+        <div class="panel" id="panel-system">
+          <div class="panel-head"><span class="ph-index">01</span><span>Systemstatus</span><span class="ph-meta mono" id="host-label"></span></div>
+          <div class="panel-body" id="system-body"><div class="empty mono">Erfasse Messwerte …</div></div>
+        </div>
+        <div class="panel" id="panel-mcp">
+          <div class="panel-head"><span class="ph-index">02</span><span>MCP-Verbindungen</span><span class="ph-meta mono" id="mcp-count"></span></div>
+          <div class="panel-body" id="mcp-body"></div>
+        </div>
+        <div class="panel" id="panel-agenda">
+          <div class="panel-head"><span class="ph-index">03</span><span>Heute</span><span class="ph-meta mono" id="agenda-meta"></span></div>
+          <div class="panel-body" id="agenda-body"></div>
+        </div>
+      </section>
+
+      <section class="center">
+        <button class="core-hitbox" id="core-hitbox" type="button" aria-label="Jarvis aktivieren oder unterbrechen"></button>
+        <div class="dialog" id="dialog">
+          <div class="line user" id="line-user"></div>
+          <div class="line jarvis" id="line-jarvis"></div>
+        </div>
+        <form class="command" id="command-form" autocomplete="off">
+          <span class="cmd-prefix mono">&gt;</span>
+          <input id="command-input" type="text" placeholder="Befehl eingeben oder „Jarvis“ sagen …" aria-label="Befehl an Jarvis" />
+          <button class="hud-btn" type="submit">Senden</button>
+        </form>
+        <div class="hints mono" id="hints">LEERTASTE: zuhören / unterbrechen · ESC: stopp</div>
+      </section>
+
+      <section class="col col-right">
+        <div class="panel" id="panel-tasks">
+          <div class="panel-head"><span class="ph-index">04</span><span>Agenten &amp; Aufgaben</span><span class="ph-meta mono" id="tasks-count"></span></div>
+          <div class="panel-body" id="tasks-body"></div>
+        </div>
+        <div class="panel" id="panel-activity">
+          <div class="panel-head"><span class="ph-index">05</span><span>Aktivität</span><span class="ph-meta mono" id="activity-meta"></span></div>
+          <div class="panel-body" id="activity-body"><div class="empty mono">Noch keine Aktionen.</div></div>
+        </div>
+        <div class="panel" id="panel-log">
+          <div class="panel-head"><span class="ph-index">06</span><span>Protokoll</span><button class="ph-action mono" id="log-toggle" type="button">Verlauf</button></div>
+          <div class="panel-body" id="log-body"></div>
+        </div>
+      </section>
+    </main>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+
+    <div class="confirm" id="confirm" hidden>
+      <div class="confirm-box">
+        <div class="confirm-tag mono">BESTÄTIGUNG ERFORDERLICH</div>
+        <div class="confirm-title" id="confirm-title"></div>
+        <pre class="confirm-detail mono" id="confirm-detail"></pre>
+        <div class="confirm-actions">
+          <button class="hud-btn danger" id="confirm-no" type="button">Ablehnen</button>
+          <button class="hud-btn primary" id="confirm-yes" type="button">Bestätigen</button>
+        </div>
+        <div class="confirm-hint mono">oder sag „Ja“ / „Nein“</div>
+      </div>
+    </div>
+
+    <aside class="drawer" id="settings" hidden>
+      <div class="panel-head"><span class="ph-index">⚙</span><span>Einstellungen</span><button class="ph-action mono" id="settings-close" type="button">Schließen</button></div>
+      <div class="drawer-body">
+        <label class="row"><span>Mikrofon</span><input type="checkbox" id="set-mic" /></label>
+        <label class="row"><span>Sprachaktivierung („Jarvis“)</span><input type="checkbox" id="set-wake" /></label>
+        <div class="row sub mono" id="wake-engine"></div>
+        <label class="row"><span>Sprachausgabe</span><input type="checkbox" id="set-speak" /></label>
+        <label class="row"><span>Stimme (Provider)</span>
+          <select id="set-provider">
+            <option value="elevenlabs">ElevenLabs</option>
+            <option value="openai">OpenAI</option>
+            <option value="browser">Browser (lokal)</option>
+          </select>
+        </label>
+        <label class="row" id="row-browser-voice"><span>Browser-Stimme</span><select id="set-browser-voice"></select></label>
+        <label class="row"><span>Sprechtempo <b id="speed-val" class="mono"></b></span><input type="range" id="set-speed" min="0.7" max="1.3" step="0.05" /></label>
+        <label class="row"><span>Lautstärke</span><input type="range" id="set-volume" min="0" max="1" step="0.05" /></label>
+        <div class="row sub mono" id="stt-info"></div>
+        <div class="row"><button class="hud-btn danger" id="clear-history" type="button">Gesprächsverlauf löschen</button></div>
+        <div class="row sub mono">Datenschutz: Ohne Wake-Word verlässt kein Audio den Rechner (Porcupine-Modus). Die Anzeige oben rechts zeigt jederzeit, ob Audio an die Spracherkennung übertragen wird.</div>
+      </div>
+    </aside>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

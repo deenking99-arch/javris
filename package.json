@@ -1,0 +1,33 @@
+{
+  "name": "jarvis",
+  "version": "2.0.0",
+  "private": true,
+  "description": "JARVIS 2.0 – persönlicher Sprach-KI-Assistent mit holografischem Interface",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "node server/index.js --dev",
+    "build": "vite build",
+    "start": "node server/index.js",
+    "setup:wakeword": "node scripts/fetch-porcupine-model.js",
+    "setup:browser": "playwright install chromium",
+    "test": "node --test --test-concurrency=1 test/*.test.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@picovoice/porcupine-web": "^4.0.1",
+    "@picovoice/web-voice-processor": "^4.0.10",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "node-cron": "^4.2.1",
+    "node-ical": "^0.20.1",
+    "playwright": "^1.55.0",
+    "systeminformation": "^5.33.19",
+    "three": "^0.187.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "vite": "^7.1.0"
+  }
+}
